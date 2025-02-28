@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EtherEd AI</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="Ether.png" />
+    <!-- Google Fonts: Inter for a professional, modern look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+        transition: all 0.3s ease;
+      }
+
+      body {
+        background: linear-gradient(135deg, #ffffff, #f0eaff, #e6f0ff);
+        color: #333;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      .app-container {
+        display: flex;
+        width: 100%;
+        max-width: 1600px;
+        height: 100vh;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      }
+
+      .sidebar {
+        width: 300px;
+        background: #fff;
+        border-right: 1px solid #e0e4e8;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 1000;
+      }
+
+      .sidebar.active {
+        /* Already visible by default, no transform needed */
+      }
+
+      .sidebar-toggle {
+        position: fixed;
+        left: 20px;
+        top: 20px;
+        background: linear-gradient(145deg, #007bff, #00d4ff);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        color: #fff;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        z-index: 1001;
+        display: none; /* Hidden since sidebar is visible by default */
+      }
+
+      .sidebar-toggle.hidden {
+        display: none;
+      }
+
+      .sidebar-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
+      }
+
+      .collapse-btn {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        background: #fff;
+        border: 1px solid #e0e4e8;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        color: #666;
+        font-size: 1.2rem;
+        display: block; /* Visible since sidebar is active by default */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .collapse-btn.visible {
+        display: block;
+      }
+
+      .collapse-btn:hover {
+        border-color: #007bff;
+        color: #007bff;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+      }
+
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .sidebar-header i {
+        font-size: 1.3rem;
+        color: #007bff;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 20px;
+      }
+
+      .path-section {
+        margin-bottom: 15px;
+      }
+
+      .path-section h3 {
+        color: #333;
+        cursor: pointer;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .path-section h3 i {
+        color: #007bff;
+        font-size: 1rem;
+        transition: transform 0.3s ease;
+      }
+
+      .path-section h3:hover {
+        background: #e6f0ff;
+        transform: translateX(5px);
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.1);
+      }
+
+      .path-section h3:hover i {
+        transform: rotate(90deg);
+      }
+
+      .chat-list {
+        display: none;
+        padding-left: 25px;
+        padding-top: 5px;
+      }
+
+      .chat-list.active {
+        display: block;
+      }
+
+      .chat-item {
+        margin: 8px 0;
+        padding: 10px 15px;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #666;
+        border: 1px solid #e0e4e8;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .chat-item i {
+        color: #007bff;
+        font-size: 0.9rem;
+      }
+
+      .chat-item:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0, 123, 255, 0.1);
+        color: #007bff;
+      }
+
+      .new-chat-btn {
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        background: linear-gradient(145deg, #007bff, #00d4ff);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .new-chat-btn i {
+        font-size: 1rem;
+      }
+
+      .new-chat-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
+        background: linear-gradient(145deg, #00d4ff, #007bff);
+      }
+
+      .main-content {
+    flex: 1;
+    background: transparent;
+    overflow-y: auto;
+    position: relative;
+    min-height: 100vh; /* Use min-height instead of height to allow content to grow */
+    -webkit-overflow-scrolling: touch;
+}
+
+.container {
+    padding: 60px 40px 40px 40px; /* Add top padding to account for fixed balance display */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100%;
+}
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      h1 i {
+        color: #007bff;
+        font-size: 2rem;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+      }
+
+      .welcome-message {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .welcome-message h2 {
+        font-size: 2.5rem;
+        color: #333;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .welcome-message h2 i {
+        font-size: 1.5rem;
+        color: #666;
+      }
+
+      .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 30px;
+      }
+
+      .suggestion-chip {
+        padding: 10px 20px;
+        background: #fff;
+        border: 1px solid #e0e4e8;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        color: #666;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .suggestion-chip:hover {
+        background: #e6f0ff;
+        border-color: #007bff;
+        color: #007bff;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.1);
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      input,
+      select,
+      button.mic {
+        width: 100%;
+        padding: 14px 20px;
+        border: 1px solid #e0e4e8;
+        border-radius: 8px;
+        background: #fff;
+        color: #333;
+        font-size: 1rem;
+        outline: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      input:focus,
+      select:focus,
+      button.mic:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+      }
+
+      input::placeholder {
+        color: #999;
+        font-style: italic;
+      }
+
+      .prompt-input-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        display: flex;
+        align-items: center;
+      }
+
+      #prompt {
+        padding-right: 90px; /* Space for both the mic and send buttons */
+      }
+
+      button.mic {
+        position: absolute;
+        right: 50px; /* Position to the left of the send button */
+        background: #fff;
+        border: 1px solid #e0e4e8;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #666;
+        font-size: 1rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      button.mic:hover {
+        border-color: #007bff;
+        color: #007bff;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+      }
+
+      .send-btn {
+        position: absolute;
+        right: 10px;
+        background: #007bff;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #fff;
+        font-size: 1rem;
+        box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+      }
+
+      .send-btn:hover {
+        background: #0056b3;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.5);
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(145deg, #007bff, #00d4ff);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button i {
+        font-size: 1rem;
+      }
+
+      button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
+        background: linear-gradient(145deg, #00d4ff, #007bff);
+      }
+
+      .speak-btn {
+        margin-top: 10px;
+        padding: 8px 16px;
+        background: linear-gradient(145deg, #007bff, #00d4ff);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .speak-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.5);
+        background: linear-gradient(145deg, #00d4ff, #007bff);
+      }
+
+      .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+        display: none;
+      }
+
+      .avatar.active {
+        display: block;
+      }
+
+      #response,
+      #feedback {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #333;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        animation: slideIn 0.5s ease-in-out;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      #dashboard,
+      #leaderboard {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #333;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        animation: slideIn 0.5s ease-in-out;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 8px 15px;
+        background: linear-gradient(145deg, #ff4e50, #f9d423);
+        color: #fff;
+        border-radius: 8px;
+        margin: 5px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .progress-bar {
+        width: 100%;
+        background: #e0e4e8;
+        border-radius: 8px;
+        height: 20px;
+        margin-top: 10px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #00d4ff);
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+      }
+
+      .feedback {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      button.feedback-btn {
+        background: linear-gradient(145deg, #4caf50, #2e7d32);
+        width: 48%;
+        margin-right: 2%;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      }
+
+      button.feedback-btn:last-child {
+        background: linear-gradient(145deg, #f44336, #d32f2f);
+        margin-right: 0;
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+      }
+
+      button.feedback-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+      }
+
+      button.feedback-btn:last-child:hover {
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.5);
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes confetti {
+        0% {
+          transform: translateY(0) rotate(0deg);
+        }
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+        }
+      }
+
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #ff0;
+        opacity: 0.8;
+        border-radius: 50%;
+        animation: confetti 2s linear infinite;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 250px;
+          left: 0;
+          top: 0;
+          height: 100vh;
+          border-right: none;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-toggle {
+          left: 10px;
+          top: 10px;
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .container {
+          margin-left: 0;
+          border-radius: 0;
+          padding: 20px;
+        }
+
+        .sidebar.active {
+          transform: translateX(0);
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .welcome-message h2 {
+          font-size: 1.8rem;
+        }
+
+        input,
+        select,
+        button {
+          padding: 12px;
+          font-size: 0.9rem;
+        }
+
+        .sidebar-header {
+          font-size: 1.2rem;
+        }
+
+        .path-section h3 {
+          font-size: 1rem;
+          padding: 10px 15px;
+        }
+
+        .chat-item {
+          font-size: 0.8rem;
+          padding: 10px 15px;
+        }
+
+        .new-chat-btn {
+          font-size: 1rem;
+          padding: 10px;
+        }
+
+        .suggestion-chip {
+          font-size: 0.8rem;
+          padding: 8px 15px;
+        }
+      }
+    </style>
+    <script src="blockies.min.js"></script>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="sidebar active" id="sidebar">
+        <div class="sidebar-header">
+          <i class="fas fa-history"></i>
+          <h2>Chat History</h2>
+        </div>
+        <div class="sidebar-content">
+          <div class="path-section">
+            <h3 onclick="togglePath(1)">
+              <i class="fas fa-folder"></i>DSA only
+            </h3>
+            <div class="chat-list" id="chat-list-1"></div>
+          </div>
+          <div class="path-section">
+            <h3 onclick="togglePath(2)">
+              <i class="fas fa-code"></i>Programming
+            </h3>
+            <div class="chat-list" id="chat-list-2"></div>
+          </div>
+          <div class="path-section">
+            <h3 onclick="togglePath(3)">
+              <i class="fas fa-link"></i>BlockChain
+            </h3>
+            <div class="chat-list" id="chat-list-3"></div>
+          </div>
+          <div class="path-section">
+            <h3 onclick="togglePath(4)">
+              <i class="fas fa-industry"></i>Non Tech field
+            </h3>
+            <div class="chat-list" id="chat-list-4"></div>
+          </div>
+          <div class="path-section">
+            <h3 onclick="togglePath(5)">
+              <i class="fas fa-comments"></i>Random
+            </h3>
+            <div class="chat-list" id="chat-list-5"></div>
+          </div>
+          <button class="new-chat-btn" onclick="newChat()">
+            <i class="fas fa-plus"></i>New Chat
+          </button>
+        </div>
+      </div>
+      <div class="main-content">
+        <div class="container">
+          <div class="welcome-message">
+            <h2><i class="fas fa-sparkles"></i>Welcome to EtherEd AI</h2>
+            <div class="suggestions">
+              <div
+                class="suggestion-chip"
+                onclick="document.getElementById('prompt').value='What is a binary search tree?'; document.getElementById('path').value='1'; submit()"
+              >
+                What is a binary search tree?
+              </div>
+              <div
+                class="suggestion-chip"
+                onclick="document.getElementById('prompt').value='How do I debug a JavaScript function?'; document.getElementById('path').value='2'; submit()"
+              >
+                How do I debug a JavaScript function?
+              </div>
+              <div
+                class="suggestion-chip"
+                onclick="document.getElementById('prompt').value='What are Ethereum smart contracts?'; document.getElementById('path').value='3'; submit()"
+              >
+                What are Ethereum smart contracts?
+              </div>
+              <div
+                class="suggestion-chip"
+                onclick="document.getElementById('prompt').value='What is aerodynamics in aerospace?'; document.getElementById('path').value='4'; submit()"
+              >
+                What is aerodynamics in aerospace?
+              </div>
+              <div
+                class="suggestion-chip"
+                onclick="document.getElementById('prompt').value='Tell me about your favorite movie'; document.getElementById('path').value='5'; submit()"
+              >
+                Tell me about your favorite movie
+              </div>
+            </div>
+          </div>
+          <div class="avatar" id="avatar"></div>
+          <div class="input-group">
+            <input id="address" placeholder="Your Ethereum Address" />
+          </div>
+          <div class="input-group">
+            <select id="eth_amount">
+              <option value="0">No Payment</option>
+              <option value="10000000000000000">0.01 ETH</option>
+              <option value="20000000000000000">0.02 ETH</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <select id="path">
+              <option value="1">DSA only</option>
+              <option value="2">Programming</option>
+              <option value="3">BlockChain</option>
+              <option value="4">Non Tech field</option>
+              <option value="5">Random</option>
+            </select>
+          </div>
+          <div class="prompt-input-wrapper">
+            <input
+              id="prompt"
+              placeholder="Ask about Python, Blockchain, or Ethereum..."
+            />
+            <button class="mic" onclick="startVoiceInput()">
+              <i class="fas fa-microphone"></i>
+            </button>
+            <button class="send-btn" onclick="submit()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <div id="response"></div>
+          <div class="feedback" id="feedback"></div>
+          <div id="dashboard"></div>
+          <div id="leaderboard"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function safeReplace(str, search, replacement) {
+        if (!str || typeof str !== "string") {
+            console.warn("safeReplace called with invalid string:", str);
+            return "";
+        }
+        return str.replace(search, replacement);
+    }
+
+    let confettiInterval;
+    let utterance = new SpeechSynthesisUtterance();
+    let currentAddress = "";
+    let currentPath = 1;
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const toggleBtn = document.getElementById("sidebar-toggle");
+        const collapseBtn = document.getElementById("collapse-btn");
+
+        sidebar.classList.toggle("active");
+        if (sidebar.classList.contains("active")) {
+          toggleBtn.classList.add("hidden");
+          collapseBtn.classList.remove("visible");
+        } else {
+          toggleBtn.classList.remove("hidden");
+          collapseBtn.classList.add("visible");
+        }
+      }
+
+      function togglePath(path) {
+        const chatList = document.getElementById(`chat-list-${path}`);
+        chatList.classList.toggle("active");
+        loadChatHistory(currentAddress, path);
+      }
+
+      function newChat() {
+        document.getElementById("prompt").value = "";
+        document.getElementById("response").innerHTML = "";
+        document.getElementById("feedback").innerHTML = "";
+        document.getElementById("path").value = "1"; // Default to DSA only
+        currentPath = 1;
+        if (currentAddress) {
+          loadChatHistory(currentAddress, currentPath);
+        }
+      }
+
+      function createAvatar(address) {
+        console.log("Creating avatar for:", address);
+        if (!address) {
+          document.getElementById("avatar").classList.remove("active");
+          document.getElementById("avatar").innerHTML = "";
+          return;
+        }
+        const blockie = blockies.create({
+          seed: address.toLowerCase(),
+          size: 8,
+          scale: 6,
+        });
+        document.getElementById("avatar").innerHTML = "";
+        document.getElementById("avatar").appendChild(blockie);
+        document.getElementById("avatar").classList.add("active");
+      }
+
+      async function submit() {
+    const address = document.getElementById("address").value;
+    const prompt = document.getElementById("prompt").value;
+    const ethAmount = document.getElementById("eth_amount").value;
+    const path = document.getElementById("path").value;
+    const responseDiv = document.getElementById("response");
+
+    console.log("Full payload:", { student_address: address, prompt, eth_amount: ethAmount, path: parseInt(path) });
+
+    if (!address || !prompt) {
+        responseDiv.innerHTML = "Please fill in address and question!";
+        return;
+    }
+
+    createAvatar(address);
+    responseDiv.innerHTML = "Loading...";
+    document.getElementById("feedback").innerHTML = "";
+    currentAddress = address;
+    currentPath = parseInt(path);
+
+    try {
+        const res = await fetch("/tutor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ student_address: address, prompt, eth_amount: ethAmount, path: parseInt(path) })
+        });
+
+        const data = await res.json();
+        console.log("API Response:", data);
+        
+        // Check for custom error in the response
+        if (data.custom_error) {
+            responseDiv.innerHTML = data.custom_error; // Only show the error message
+            return;
+        }
+
+        // If no custom error, render the response with Speak button
+        responseDiv.innerHTML = `
+            <strong>Response:</strong> ${data.response}<br>
+            <strong>Progress:</strong> ${data.progress} lessons<br>
+            <strong>Score:</strong> ${data.score} points<br>
+            <button class="speak-btn" onclick="speakResponse('${data.response.replace(/'/g, "\\'")}')"><i class="fas fa-volume-up"></i> Speak</button>
+        `;
+        loadDashboard(address);
+        loadChatHistory(address, parseInt(path));
+        checkMilestones(data.progress, data.balance);
+        showFeedbackButtons(data.response);
+
+        // Scroll to the top of the main content
+        document.querySelector(".main-content").scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+        responseDiv.innerHTML = `Something went wrong: ${error.message}`;
+    }
+}
+      async function loadDashboard(address) {
+        const dashboard = document.getElementById("dashboard");
+        try {
+          const res = await fetch(`/stats/${address}`);
+          if (!res.ok)
+            throw new Error(`Failed to fetch dashboard stats: ${res.status}`);
+          const data = await res.json();
+          const progressPercent = Math.min(data.lessons * 10, 100);
+          let badgeHtml = "";
+          if (data.badges.length > 0) {
+            badgeHtml = data.badges
+              .map((b) => `<span class="badge">Badge ${b}</span>`)
+              .join("");
+          }
+          let pathText =
+            data.path === 1
+              ? "Python"
+              : data.path === 2
+              ? "Blockchain"
+              : "No Path";
+          dashboard.innerHTML = `
+                    <strong>Lessons:</strong> ${data.lessons}<br>
+                    <strong>Score:</strong> ${data.score} points<br>
+                    <strong>Sessions:</strong> ${data.sessions}<br>
+                    <strong>Balance:</strong> ${data.balance} ETH<br>
+                    <strong>Path:</strong> ${pathText}<br>
+                    <strong>Challenges:</strong> ${data.challenges}<br>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    ${badgeHtml}
+                `;
+          loadLeaderboard();
+        } catch (error) {
+          dashboard.innerHTML = `Error loading dashboard: ${error.message}`;
+        }
+      }
+
+      async function loadChatHistory(address, path) {
+    const chatList = document.getElementById(`chat-list-${path}`);
+    try {
+        const res = await fetch(`/chat-history/${address}/${path}`);
+        if (!res.ok) throw new Error(`Failed to fetch chat history: ${res.status}`);
+        const data = await res.json();
+        console.log(`Chat history data for path ${path}:`, data);
+        let historyHtml = "";
+        if (data.chat_history && data.chat_history.length > 0) {
+            data.chat_history.forEach(chat => {
+                console.log("Chat item:", chat); // Log each chat item to debug
+                const chatString = encodeURIComponent(JSON.stringify(chat));
+                // Escape single quotes for safe embedding in onclick
+                const escapedChatString = chatString.replace(/'/g, "\\'");
+                historyHtml += `<div class="chat-item" onclick="loadChat('${escapedChatString}')"><i class="fas fa-comment"></i><strong>${chat.timestamp}</strong> - ${chat.prompt}</div>`;
+            });
+        } else {
+            historyHtml = "No chat history to show.";
+        }
+        chatList.innerHTML = historyHtml;
+    } catch (error) {
+        console.error(`Error loading chat history: ${error.message}`);
+        chatList.innerHTML = "No chat history to show.";
+    }
+}
+
+function loadChat(chatString) {
+    let chat;
+    try {
+        chat = JSON.parse(decodeURIComponent(chatString));
+        console.log("Loaded chat:", chat); // Log the chat object to debug
+    } catch (error) {
+        console.error("Error parsing chatString:", error);
+        chat = { prompt: "Error", response: "Failed to load chat", timestamp: "N/A" };
+    }
+    document.getElementById("prompt").value = chat.prompt || "N/A";
+    document.getElementById("path").value = chat.path || "1";
+    const responseDiv = document.getElementById("response");
+    const response = chat.response || "No response available"; // Fallback if chat.response is undefined
+    responseDiv.innerHTML = `
+        <strong>Response:</strong> ${response}<br>
+        <strong>Retrieved from history at:</strong> ${chat.timestamp || "N/A"}<br>
+        <button class="speak-btn" onclick="speakResponse('${safeReplace(response, /'/g, "\\'")}')"><i class="fas fa-volume-up"></i> Speak</button>
+    `;
+    // Handle the feedback div
+    const feedbackDiv = document.getElementById("feedback");
+    if (feedbackDiv) {
+        // Clear the feedback content
+        feedbackDiv.innerHTML = "";
+        // Check if the feedback div is empty or not visible, and remove it if so
+        if (!feedbackDiv.innerHTML.trim() || feedbackDiv.style.display === "none") {
+            console.log("Removing feedback div as it's empty or not visible");
+            feedbackDiv.remove();
+        }
+    }
+
+    // Scroll to the top of the main content
+    document.querySelector(".main-content").scrollTo({ top: 0, behavior: "smooth" });
+}
+
+      async function loadLeaderboard() {
+        const leaderboard = document.getElementById("leaderboard");
+        leaderboard.innerHTML = `
+                <strong>Leaderboard:</strong><br>
+                1. 0xA19Ee5... - ${Math.floor(Math.random() * 100)} points<br>
+                2. 0x12345... - ${Math.floor(Math.random() * 100)} points<br>
+                3. 0x67890... - ${Math.floor(Math.random() * 100)} points
+            `;
+      }
+
+      function checkMilestones(lessons, balance) {
+        if (lessons >= 5 || balance >= 0.1) {
+          startConfetti();
+          setTimeout(stopConfetti, 3000);
+        }
+      }
+
+      function startConfetti() {
+        stopConfetti();
+        confettiInterval = setInterval(() => {
+          const confetti = document.createElement("div");
+          confetti.className = "confetti";
+          confetti.style.left = Math.random() * 100 + "vw";
+          confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+          document.body.appendChild(confetti);
+          setTimeout(() => confetti.remove(), 2000);
+        }, 100);
+      }
+
+      function stopConfetti() {
+        if (confettiInterval) clearInterval(confettiInterval);
+        document.querySelectorAll(".confetti").forEach((c) => c.remove());
+      }
+
+      function startVoiceInput() {
+        const recognition = new (window.SpeechRecognition ||
+          window.webkitSpeechRecognition)();
+        recognition.onresult = (event) => {
+          const prompt = event.results[0][0].transcript;
+          document.getElementById("prompt").value = prompt;
+        };
+        recognition.start();
+      }
+
+      function speakResponse(text) {
+        utterance.text = text;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function showFeedbackButtons(response) {
+        const feedbackDiv = document.getElementById("feedback");
+        feedbackDiv.innerHTML = `
+                <button class="feedback-btn" onclick="sendFeedback('up', '${response}')">👍</button>
+                <button class="feedback-btn" onclick="sendFeedback('down', '${response}')">👎</button>
+            `;
+      }
+
+      async function sendFeedback(rating, response) {
+        console.log(`Feedback: ${rating} for response: ${response}`);
+        document.getElementById(
+          "feedback"
+        ).innerHTML = `Thanks for feedback! (${rating})`;
+      }
+
+      document.getElementById("address").addEventListener("input", function () {
+        if (this.value) createAvatar(this.value);
+        else createAvatar("");
+      });
+    </script>
+  </body>
+</html>
