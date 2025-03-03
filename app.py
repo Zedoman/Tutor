@@ -3,7 +3,6 @@ from GroqClient import GroqClient
 from blockchain_client import BlockchainClient
 from config import Config
 import json
-0x5AC9300BDB5D5e12Ff86EEa861924D396B5ee348
 import datetime
 import traceback
 
