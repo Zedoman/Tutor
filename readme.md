@@ -210,3 +210,8 @@ curl -X GET http://127.0.0.1:5000/stats/0xYourEthereumAddress
 - **Educational Partnerships**: Partner with MOOCs (Coursera, Udemy, Khan Academy) or universities for verified blockchain-backed certificates.
 - **MetaMask Integration**: Real ETH transactions.
 - **NFT-Based Tutoring Sessions:**: Issue exclusive NFTs granting access to premium AI tutors.
+
+
+
+https://github.com/user-attachments/assets/d18b2778-d64e-4658-8349-9e58454348a6
+
