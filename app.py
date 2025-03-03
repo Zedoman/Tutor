@@ -3,8 +3,10 @@ from GroqClient import GroqClient
 from blockchain_client import BlockchainClient
 from config import Config
 import json
+0x5AC9300BDB5D5e12Ff86EEa861924D396B5ee348
 import datetime
 import traceback
+from fuzzywuzzy import fuzz
 
 app = Flask(__name__, static_folder="./frontend", static_url_path="")
 groq_client = GroqClient()
@@ -16,6 +18,9 @@ chat_history = {}  # {student_address: {path: [messages]}}
 # Helper function to check if prompt matches the path
 def validate_prompt_for_path(prompt, path):
     prompt_lower = prompt.lower()
+
+    # Normalize prompt by removing extra spaces for better matching
+    prompt_normalized = " ".join(prompt_lower.split())
     
     if path == 1:  # DSA only
         dsa_keywords = [

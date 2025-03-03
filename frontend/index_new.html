@@ -141,6 +141,21 @@
         margin-bottom: 15px;
       }
 
+      /* Hide divs by default */
+#avatar, #response, #feedback, #dashboard, #leaderboard {
+    display: none;
+}
+
+/* Class to show divs when they have content */
+.visible {
+    display: block !important;
+}
+
+/* Ensure feedback div is flex when visible */
+#feedback.visible {
+    display: flex !important;
+}
+
       .path-section h3 {
         color: #333;
         cursor: pointer;
@@ -490,7 +505,6 @@
         display: block;
       }
 
-      #response,
       #feedback {
         margin-top: 20px;
         padding: 20px;
@@ -504,6 +518,105 @@
         width: 100%;
         max-width: 600px;
       }
+
+      /* Enhanced response styling */
+#response {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(145deg, #1e2a44, #2a3b5e); /* Cyberpunk dark gradient */
+    border-radius: 12px;
+    border: 1px solid #00d4ff; /* Neon cyan border */
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); /* Glowing effect */
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #e0e4e8; /* Light text for contrast */
+    width: 100%;
+    max-width: 600px;
+    animation: slideIn 0.5s ease-in-out;
+}
+
+/* Headings inside response */
+#response h3 {
+    font-size: 1.25rem;
+    color: #00d4ff; /* Neon cyan */
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-bottom: 2px solid #ff4e50; /* Neon red underline */
+    padding-bottom: 5px;
+}
+
+/* Code block styling */
+#response .code-block {
+    background: #2e3a59; /* Darker background for code */
+    border: 1px solid #00d4ff; /* Neon cyan border */
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    color: #f0f0f0; /* Light text */
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    overflow-x: auto; /* Horizontal scroll for long lines */
+    box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.2); /* Inner glow */
+}
+
+/* Code inline styling (for variables, etc.) */
+#response .code-inline {
+    background: #3a4a73;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #ff4e50; /* Neon red for inline code */
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Explanation list styling */
+#response .explanation-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+#response .explanation-list li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 10px;
+    color: #e0e4e8;
+}
+
+#response .explanation-list li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    color: #00d4ff; /* Neon cyan bullet */
+    font-weight: bold;
+}
+
+/* Notes section styling */
+#response .notes {
+    background: rgba(255, 78, 80, 0.1); /* Subtle red background */
+    border-left: 4px solid #ff4e50; /* Neon red left border */
+    padding: 10px 15px;
+    margin-top: 10px;
+    border-radius: 4px;
+    color: #e0e4e8;
+    font-style: italic;
+}
+
+/* Progress and Score styling */
+#response .progress-info {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #00d4ff; /* Neon cyan separator */
+    color: #b0b8c4; /* Slightly muted text */
+    font-size: 0.95rem;
+}
+
+/* Speak button alignment */
+#response .speak-btn {
+    margin-top: 15px;
+    width: auto;
+    display: inline-flex;
+}
 
       #dashboard,
       #leaderboard {
@@ -848,113 +961,211 @@
       }
 
       function createAvatar(address) {
-        console.log("Creating avatar for:", address);
-        if (!address) {
-          document.getElementById("avatar").classList.remove("active");
-          document.getElementById("avatar").innerHTML = "";
-          return;
-        }
-        const blockie = blockies.create({
-          seed: address.toLowerCase(),
-          size: 8,
-          scale: 6,
-        });
-        document.getElementById("avatar").innerHTML = "";
-        document.getElementById("avatar").appendChild(blockie);
-        document.getElementById("avatar").classList.add("active");
-      }
+    const avatarDiv = document.getElementById("avatar");
+    console.log("Creating avatar for:", address);
+    if (!address) {
+        avatarDiv.classList.remove("active");
+        avatarDiv.classList.remove("visible"); // Hide the div
+        avatarDiv.innerHTML = "";
+        return;
+    }
+    const blockie = blockies.create({
+        seed: address.toLowerCase(),
+        size: 8,
+        scale: 6
+    });
+    avatarDiv.innerHTML = "";
+    avatarDiv.appendChild(blockie);
+    avatarDiv.classList.add("active");
+    avatarDiv.classList.add("visible"); // Show the div
+}
 
-      async function submit() {
+async function submit() {
     const address = document.getElementById("address").value;
     const prompt = document.getElementById("prompt").value;
-    const ethAmount = document.getElementById("eth_amount").value;
+    const ethAmount = document.getElementById("eth_amount").value || "0";
     const path = document.getElementById("path").value;
     const responseDiv = document.getElementById("response");
+    const feedbackDiv = document.getElementById("feedback");
+    const dashboardDiv = document.getElementById("dashboard");
 
-    console.log("Full payload:", { student_address: address, prompt, eth_amount: ethAmount, path: parseInt(path) });
+    console.log("Starting submit() with payload:", { student_address: address, prompt, eth_amount: ethAmount, path: parseInt(path) });
 
     if (!address || !prompt) {
         responseDiv.innerHTML = "Please fill in address and question!";
+        responseDiv.classList.add("visible"); // Show response div with error
         return;
     }
 
+    console.log("Calling createAvatar with address:", address);
     createAvatar(address);
     responseDiv.innerHTML = "Loading...";
-    document.getElementById("feedback").innerHTML = "";
+    responseDiv.classList.add("visible"); // Show response div during loading
+    feedbackDiv.innerHTML = "";
+    feedbackDiv.classList.remove("visible"); // Hide feedback div
+    dashboardDiv.classList.remove("visible"); // Hide dashboard div
     currentAddress = address;
     currentPath = parseInt(path);
 
     try {
+        console.log("Sending fetch request to /tutor");
         const res = await fetch("/tutor", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ student_address: address, prompt, eth_amount: ethAmount, path: parseInt(path) })
         });
 
+        console.log("Fetch response status:", res.status);
+        if (!res.ok) {
+            throw new Error(`Server returned status: ${res.status}`);
+        }
+
         const data = await res.json();
         console.log("API Response:", data);
         
         // Check for custom error in the response
         if (data.custom_error) {
-            responseDiv.innerHTML = data.custom_error; // Only show the error message
+            console.log("Custom error received, displaying:", data.custom_error);
+            responseDiv.innerHTML = data.custom_error;
+            responseDiv.classList.add("visible"); // Show response div with error
             return;
         }
 
-        // If no custom error, render the response with Speak button
-        responseDiv.innerHTML = `
-            <strong>Response:</strong> ${data.response}<br>
-            <strong>Progress:</strong> ${data.progress} lessons<br>
-            <strong>Score:</strong> ${data.score} points<br>
-            <button class="speak-btn" onclick="speakResponse('${data.response.replace(/'/g, "\\'")}')"><i class="fas fa-volume-up"></i> Speak</button>
+        // If no custom error, render the response with structured formatting
+        if (!data.response) {
+            console.warn("data.response is undefined in valid case:", data);
+            responseDiv.innerHTML = "No response received from the server.";
+            responseDiv.classList.add("visible"); // Show response div with error
+            return;
+        }
+
+        // Parse and format the response
+        let responseHtml = '<h3>Response</h3>';
+
+        // Split the response into sections based on common patterns
+        const responseParts = data.response.split(/(Here's an explanation|You can test the code|Note that)/i);
+        let mainResponse = responseParts[0].trim();
+
+        // Extract code blocks using a regex for triple backticks
+        const codeBlockRegex = /```([\s\S]*?)```/g;
+        let codeBlocks = [];
+        let match;
+        while ((match = codeBlockRegex.exec(mainResponse)) !== null) {
+            codeBlocks.push(match[1].trim());
+        }
+
+        // Replace code blocks in the main response with placeholders
+        let codeBlockIndex = 0;
+        mainResponse = mainResponse.replace(codeBlockRegex, () => {
+            const codeHtml = `<div class="code-block">${codeBlocks[codeBlockIndex]}</div>`;
+            codeBlockIndex++;
+            return codeHtml;
+        });
+
+        // Format inline code (e.g., `arr[j]`) by wrapping in <span class="code-inline">
+        mainResponse = mainResponse.replace(/`([^`]+)`/g, '<span class="code-inline">$1</span>');
+
+        responseHtml += `<div>${mainResponse}</div>`;
+
+        // Handle explanation section
+        if (responseParts[1] && responseParts[1].toLowerCase().includes("here's an explanation")) {
+            let explanation = responseParts[2].trim();
+            // Convert numbered list to HTML list
+            explanation = explanation.replace(/(\d+\.\s)/g, '');
+            const explanationItems = explanation.split(/\n/).filter(item => item.trim());
+            responseHtml += '<h3>Explanation</h3><ul class="explanation-list">';
+            explanationItems.forEach(item => {
+                responseHtml += `<li>${item.trim()}</li>`;
+            });
+            responseHtml += '</ul>';
+        }
+
+        // Handle test code/example section
+        if (responseParts[3] && responseParts[3].toLowerCase().includes("you can test the code")) {
+            let example = responseParts[4].trim();
+            // Extract code block if present
+            const exampleCodeMatch = example.match(/```([\s\S]*?)```/);
+            if (exampleCodeMatch) {
+                const exampleCode = exampleCodeMatch[1].trim();
+                example = example.replace(/```[\s\S]*?```/, '');
+                responseHtml += `<h3>Example</h3><div class="code-block">${exampleCode}</div>`;
+                if (example.trim()) {
+                    responseHtml += `<div>${example.trim()}</div>`;
+                }
+            } else {
+                responseHtml += `<h3>Example</h3><div>${example}</div>`;
+            }
+        }
+
+        // Handle notes section
+        if (responseParts[5] && responseParts[5].toLowerCase().includes("note that")) {
+            let notes = responseParts[6].trim();
+            responseHtml += `<div class="notes">${notes}</div>`;
+        }
+
+        // Add progress and score
+        responseHtml += `
+            <div class="progress-info">
+                <strong>Progress:</strong> ${data.progress} lessons<br>
+                <strong>Score:</strong> ${data.score} points
+            </div>
+            <button class="speak-btn" onclick="speakResponse('${safeReplace(data.response, /'/g, "\\'")}')"><i class="fas fa-volume-up"></i> Speak</button>
         `;
-        loadDashboard(address);
+
+        console.log("Rendering response:", responseHtml);
+        responseDiv.innerHTML = responseHtml;
+        responseDiv.classList.add("visible"); // Show response div with content
+
+        // Show feedback buttons
+        console.log("Calling loadDashboard with address:", address);
+        loadDashboard(address); // This will show dashboardDiv
+        console.log("Calling loadChatHistory with address:", address, "and path:", parseInt(path));
         loadChatHistory(address, parseInt(path));
+        console.log("Calling checkMilestones with progress:", data.progress, "and balance:", data.balance);
         checkMilestones(data.progress, data.balance);
-        showFeedbackButtons(data.response);
+        console.log("Calling showFeedbackButtons with response:", data.response);
+        showFeedbackButtons(data.response); // This will show feedbackDiv
 
         // Scroll to the top of the main content
+        console.log("Scrolling to top of main content");
         document.querySelector(".main-content").scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
+        console.error("Error in submit():", error);
         responseDiv.innerHTML = `Something went wrong: ${error.message}`;
+        responseDiv.classList.add("visible"); // Show response div with error
     }
 }
-      async function loadDashboard(address) {
-        const dashboard = document.getElementById("dashboard");
-        try {
-          const res = await fetch(`/stats/${address}`);
-          if (!res.ok)
-            throw new Error(`Failed to fetch dashboard stats: ${res.status}`);
-          const data = await res.json();
-          const progressPercent = Math.min(data.lessons * 10, 100);
-          let badgeHtml = "";
-          if (data.badges.length > 0) {
-            badgeHtml = data.badges
-              .map((b) => `<span class="badge">Badge ${b}</span>`)
-              .join("");
-          }
-          let pathText =
-            data.path === 1
-              ? "Python"
-              : data.path === 2
-              ? "Blockchain"
-              : "No Path";
-          dashboard.innerHTML = `
-                    <strong>Lessons:</strong> ${data.lessons}<br>
-                    <strong>Score:</strong> ${data.score} points<br>
-                    <strong>Sessions:</strong> ${data.sessions}<br>
-                    <strong>Balance:</strong> ${data.balance} ETH<br>
-                    <strong>Path:</strong> ${pathText}<br>
-                    <strong>Challenges:</strong> ${data.challenges}<br>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                    </div>
-                    ${badgeHtml}
-                `;
-          loadLeaderboard();
-        } catch (error) {
-          dashboard.innerHTML = `Error loading dashboard: ${error.message}`;
+async function loadDashboard(address) {
+    const dashboardDiv = document.getElementById("dashboard");
+    try {
+        const res = await fetch(`/stats/${address}`);
+        if (!res.ok) throw new Error(`Failed to fetch dashboard stats: ${res.status}`);
+        const data = await res.json();
+        const progressPercent = Math.min(data.lessons * 10, 100);
+        let badgeHtml = "";
+        if (data.badges.length > 0) {
+            badgeHtml = data.badges.map(b => `<span class="badge">Badge ${b}</span>`).join("");
         }
-      }
+        let pathText = data.path === 1 ? "DSA only" : data.path === 2 ? "Programming" : data.path === 3 ? "BlockChain" : data.path === 4 ? "Non Tech field" : "Random";
+        dashboardDiv.innerHTML = `
+            <strong>Lessons:</strong> ${data.lessons}<br>
+            <strong>Score:</strong> ${data.score} points<br>
+            <strong>Sessions:</strong> ${data.sessions}<br>
+            <strong>Balance:</strong> ${data.balance} ETH<br>
+            <strong>Path:</strong> ${pathText}<br>
+            <strong>Challenges:</strong> ${data.challenges}<br>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+            ${badgeHtml}
+        `;
+        dashboardDiv.classList.add("visible"); // Show dashboard div
+        loadLeaderboard();
+    } catch (error) {
+        dashboardDiv.innerHTML = `Error loading dashboard: ${error.message}`;
+        dashboardDiv.classList.add("visible"); // Show dashboard div with error
+    }
+}
 
       async function loadChatHistory(address, path) {
     const chatList = document.getElementById(`chat-list-${path}`);
@@ -986,7 +1197,7 @@ function loadChat(chatString) {
     let chat;
     try {
         chat = JSON.parse(decodeURIComponent(chatString));
-        console.log("Loaded chat:", chat); // Log the chat object to debug
+        console.log("Loaded chat:", chat);
     } catch (error) {
         console.error("Error parsing chatString:", error);
         chat = { prompt: "Error", response: "Failed to load chat", timestamp: "N/A" };
@@ -994,18 +1205,41 @@ function loadChat(chatString) {
     document.getElementById("prompt").value = chat.prompt || "N/A";
     document.getElementById("path").value = chat.path || "1";
     const responseDiv = document.getElementById("response");
-    const response = chat.response || "No response available"; // Fallback if chat.response is undefined
-    responseDiv.innerHTML = `
-        <strong>Response:</strong> ${response}<br>
-        <strong>Retrieved from history at:</strong> ${chat.timestamp || "N/A"}<br>
-        <button class="speak-btn" onclick="speakResponse('${safeReplace(response, /'/g, "\\'")}')"><i class="fas fa-volume-up"></i> Speak</button>
-    `;
+
+    // Format historical chat response
+    let responseHtml = '<h3>Response</h3>';
+
+    // Extract code blocks if present
+    const codeBlockRegex = /```([\s\S]*?)```/g;
+    let codeBlocks = [];
+    let match;
+    const response = chat.response || "No response available";
+    while ((match = codeBlockRegex.exec(response)) !== null) {
+        codeBlocks.push(match[1].trim());
+    }
+
+    let formattedResponse = response;
+    let codeBlockIndex = 0;
+    formattedResponse = formattedResponse.replace(codeBlockRegex, () => {
+        const codeHtml = `<div class="code-block">${codeBlocks[codeBlockIndex]}</div>`;
+        codeBlockIndex++;
+        return codeHtml;
+    });
+
+    // Format inline code
+    formattedResponse = formattedResponse.replace(/`([^`]+)`/g, '<span class="code-inline">$1</span>');
+
+    responseHtml += `<div>${formattedResponse}</div>`;
+    responseHtml += `<div class="progress-info"><strong>Retrieved from history at:</strong> ${chat.timestamp || "N/A"}</div>`;
+    responseHtml += `<button class="speak-btn" onclick="speakResponse('${safeReplace(response, /'/g, "\\'")}')"><i class="fas fa-volume-up"></i> Speak</button>`;
+
+    responseDiv.innerHTML = responseHtml;
+    responseDiv.classList.add("visible"); // Show response div
+
     // Handle the feedback div
     const feedbackDiv = document.getElementById("feedback");
     if (feedbackDiv) {
-        // Clear the feedback content
         feedbackDiv.innerHTML = "";
-        // Check if the feedback div is empty or not visible, and remove it if so
         if (!feedbackDiv.innerHTML.trim() || feedbackDiv.style.display === "none") {
             console.log("Removing feedback div as it's empty or not visible");
             feedbackDiv.remove();
@@ -1016,15 +1250,16 @@ function loadChat(chatString) {
     document.querySelector(".main-content").scrollTo({ top: 0, behavior: "smooth" });
 }
 
-      async function loadLeaderboard() {
-        const leaderboard = document.getElementById("leaderboard");
-        leaderboard.innerHTML = `
-                <strong>Leaderboard:</strong><br>
-                1. 0xA19Ee5... - ${Math.floor(Math.random() * 100)} points<br>
-                2. 0x12345... - ${Math.floor(Math.random() * 100)} points<br>
-                3. 0x67890... - ${Math.floor(Math.random() * 100)} points
-            `;
-      }
+async function loadLeaderboard() {
+    const leaderboardDiv = document.getElementById("leaderboard");
+    leaderboardDiv.innerHTML = `
+        <strong>Leaderboard:</strong><br>
+        1. 0xA19Ee5... - ${Math.floor(Math.random() * 100)} points<br>
+        2. 0x12345... - ${Math.floor(Math.random() * 100)} points<br>
+        3. 0x67890... - ${Math.floor(Math.random() * 100)} points
+    `;
+    leaderboardDiv.classList.add("visible"); // Show leaderboard div
+}
 
       function checkMilestones(lessons, balance) {
         if (lessons >= 5 || balance >= 0.1) {
@@ -1066,12 +1301,19 @@ function loadChat(chatString) {
       }
 
       function showFeedbackButtons(response) {
-        const feedbackDiv = document.getElementById("feedback");
-        feedbackDiv.innerHTML = `
-                <button class="feedback-btn" onclick="sendFeedback('up', '${response}')">👍</button>
-                <button class="feedback-btn" onclick="sendFeedback('down', '${response}')">👎</button>
-            `;
-      }
+    const feedbackDiv = document.getElementById("feedback");
+    if (!response || typeof response !== "string") {
+        console.warn("showFeedbackButtons called with invalid response:", response);
+        feedbackDiv.classList.remove("visible"); // Hide if no response
+        return;
+    }
+    const safeResponse = safeReplace(response, /'/g, "\\'");
+    feedbackDiv.innerHTML = `
+        <button class="feedback-btn" onclick="sendFeedback('up', '${safeResponse}')">👍</button>
+        <button class="feedback-btn" onclick="sendFeedback('down', '${safeResponse}')">👎</button>
+    `;
+    feedbackDiv.classList.add("visible"); // Show feedback div
+}
 
       async function sendFeedback(rating, response) {
         console.log(`Feedback: ${rating} for response: ${response}`);
