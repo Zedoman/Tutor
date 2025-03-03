@@ -207,6 +207,6 @@ curl -X GET http://127.0.0.1:5000/stats/0xYourEthereumAddress
 - **Token Rewards**: Introduce a custom ERC-20 token for students.
 - **Multi-Tutor Support**: Extend the contract for multiple tutors.
 - **Optimized Chat History Storage**: Off-chain indexing with The Graph.
-- **UI Enhancements**: More animations, 3D effects, React/Vue frontend.
+- **Educational Partnerships**: Partner with MOOCs (Coursera, Udemy, Khan Academy) or universities for verified blockchain-backed certificates.
 - **MetaMask Integration**: Real ETH transactions.
-- **Custom Learning Paths**: Users define their own topic-specific paths.
+- **NFT-Based Tutoring Sessions:**: Issue exclusive NFTs granting access to premium AI tutors.
