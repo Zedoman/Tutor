@@ -6,7 +6,6 @@ import json
 0x5AC9300BDB5D5e12Ff86EEa861924D396B5ee348
 import datetime
 import traceback
-from fuzzywuzzy import fuzz
 
 app = Flask(__name__, static_folder="./frontend", static_url_path="")
 groq_client = GroqClient()
