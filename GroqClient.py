@@ -7,7 +7,7 @@ load_dotenv()
 
 class GroqClient:
     def __init__(self):
-        api_key = os.getenv('GROQ_API_KEY')  # Fetch API key from environment
+        api_key = os.environ.get('GROQ_API_KEY')  # Fetch API key from environment
         if not api_key:
             raise ValueError("GROQ_API_KEY is not set in the environment")
         self.client = Groq(api_key=api_key)
